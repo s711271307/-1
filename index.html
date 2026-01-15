@@ -1,0 +1,134 @@
+{\rtf1\ansi\ansicpg950\cocoartf2821
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fmodern\fcharset0 Courier;\f1\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;\red36\green36\blue36;\red255\green255\blue255;}
+{\*\expandedcolortbl;;\cssrgb\c18824\c18824\c18824;\cssrgb\c100000\c100000\c100000;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww25400\viewh14380\viewkind0
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs28 \cf2 \cb3 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 <!DOCTYPE html>\
+<html lang="zh-TW">\
+<head>\
+    <meta charset="UTF-8">\
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">\
+    <title>\uc0\u23601 \u26989 \u26381 \u21209 \u20057 \u32026 \u38988 \u24235 \u32244 \u32722 </title>\
+    <link rel="manifest" href="manifest.json">\
+    <style>\
+        :root \{ --primary: #2c3e50; --accent: #3498db; --success: #27ae60; --error: #e74c3c; \}\
+        body \{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f7f6; margin: 0; padding: 15px; \}\
+        .container \{ max-width: 600px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); \}\
+        h1 \{ color: var(--primary); font-size: 1.5rem; text-align: center; margin-bottom: 20px; \}\
+        .stats-bar \{ background: #eee; padding: 10px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 20px; display: flex; justify-content: space-between; \}\
+        .question \{ font-size: 1.1rem; font-weight: 600; line-height: 1.5; margin-bottom: 20px; color: #34495e; \}\
+        .option \{ display: block; width: 100%; padding: 15px; margin: 10px 0; border: 2px solid #ecf0f1; border-radius: 10px; text-align: left; background: white; font-size: 1rem; cursor: pointer; transition: 0.2s; \}\
+        .option:active \{ transform: scale(0.98); \}\
+        .correct \{ background: var(--success) !important; color: white; border-color: var(--success); \}\
+        .wrong \{ background: var(--error) !important; color: white; border-color: var(--error); \}\
+        #next-btn, #start-btn \{ width: 100%; padding: 15px; background: var(--accent); color: white; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: bold; margin-top: 10px; \}\
+        .hidden \{ display: none; \}\
+    </style>\
+</head>\
+<body>\
+    <div class="container">\
+        <h1>\uc0\u38988 \u24235 \u32244 \u32722 \u21161 \u25163 </h1>\
+        <div id="stats-bar" class="stats-bar">\
+            <span>\uc0\u36914 \u24230 \u65306 <b id="done-count">0</b> / 1454</span>\
+            <span>\uc0\u27491 \u30906 \u29575 \u65306 <b id="accuracy">0%</b></span>\
+        </div>\
+\
+        <div id="home-screen">\
+            <p>\uc0\u28310 \u20633 \u22909 \u38283 \u22987 \u32244 \u32722 \u20102 \u21966 \u65311 \u27599 \u27425 \u23559 \u38568 \u27231 \u25277 \u20986  20 \u38988 \u65292 \u28085 \u33995 \u23560 \u26989 \u31185 \u30446 \u33287 \u20849 \u21516 \u31185 \u30446 \u12290 </p>\
+            <button id="start-btn" onclick="startQuiz()">\uc0\u38283 \u22987 \u38568 \u27231  20 \u38988 \u28204 \u39511 </button>\
+        </div>\
+\
+        <div id="quiz-screen" class="hidden">\
+            <div id="q-number" style="font-size: 0.8rem; color: #7f8c8d;"></div>\
+            <div id="q-text" class="question"></div>\
+            <div id="options-container"></div>\
+            <button id="next-btn" class="hidden" onclick="showNextQuestion()">\uc0\u19979 \u19968 \u38988 </button>\
+        </div>\
+    </div>\
+\
+    <script>\
+        let allData = []; // \uc0\u23436 \u25972 \u38988 \u24235 \
+        let currentQuiz = [];\
+        let currentIndex = 0;\
+        let totalPracticed = localStorage.getItem('totalPracticed') || 0;\
+        let correctCount = localStorage.getItem('correctCount') || 0;\
+\
+        // \uc0\u21021 \u22987 \u21270 \u36617 \u20837 \u36039 \u26009 \
+        async function loadData() \{\
+            try \{\
+                const response = await fetch('questions.json');\
+                allData = await response.json();\
+                updateStats();\
+            \} catch (e) \{ alert("\uc0\u38988 \u24235 \u36617 \u20837 \u22833 \u25943 \u65292 \u35531 \u30906 \u35469  questions.json \u26159 \u21542 \u22312 \u21516 \u36039 \u26009 \u22846 \u19979 \u12290 "); \}\
+        \}\
+\
+        function updateStats() \{\
+            document.getElementById('done-count').innerText = totalPracticed;\
+            const rate = totalPracticed == 0 ? 0 : Math.round((correctCount / totalPracticed) * 100);\
+            document.getElementById('accuracy').innerText = rate + "%";\
+        \}\
+\
+        function startQuiz() \{\
+            if(allData.length === 0) return;\
+            currentQuiz = [...allData].sort(() => 0.5 - Math.random()).slice(0, 20);\
+            currentIndex = 0;\
+            document.getElementById('home-screen').classList.add('hidden');\
+            document.getElementById('quiz-screen').classList.remove('hidden');\
+            showQuestion();\
+        \}\
+\
+        function showQuestion() \{\
+            const q = currentQuiz[currentIndex];\
+            document.getElementById('q-number').innerText = `\uc0\u31532  $\{currentIndex + 1\} \u38988  / \u20849  20 \u38988 `;\
+            document.getElementById('q-text').innerText = q.question;\
+            document.getElementById('next-btn').classList.add('hidden');\
+            \
+            let html = "";\
+            q.options.forEach((opt, i) => \{\
+                html += `<button class="option" onclick="handleSelect($\{i\}, $\{q.answer\})">$\{opt\}</button>`;\
+            \});\
+            document.getElementById('options-container').innerHTML = html;\
+        \}\
+\
+        function handleSelect(idx, ans) \{\
+            const btns = document.querySelectorAll('.option');\
+            btns.forEach(b => b.onclick = null); // \uc0\u38450 \u27490 \u37325 \u35079 \u40670 \u25802 \
+            \
+            totalPracticed++;\
+            if (idx === ans) \{\
+                btns[idx].classList.add('correct');\
+                correctCount++;\
+            \} else \{\
+                btns[idx].classList.add('wrong');\
+                btns[ans].classList.add('correct');\
+            \}\
+            \
+            localStorage.setItem('totalPracticed', totalPracticed);\
+            localStorage.setItem('correctCount', correctCount);\
+            updateStats();\
+            document.getElementById('next-btn').classList.remove('hidden');\
+        \}\
+\
+        function showNextQuestion() \{\
+            currentIndex++;\
+            if (currentIndex < 20) \{\
+                showQuestion();\
+            \} else \{\
+                alert("\uc0\u23436 \u25104 \u19968 \u32068 \u28204 \u39511 \u65281 ");\
+                location.reload();\
+            \}\
+        \}\
+\
+        loadData();\
+        if ('serviceWorker' in navigator) \{ navigator.serviceWorker.register('sw.js'); \}\
+    </script>\
+</body>\
+</html>\
+\pard\pardeftab720\partightenfactor0
+
+\f1 \cf2 \
+}
